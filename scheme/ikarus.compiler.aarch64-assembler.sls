@@ -204,19 +204,19 @@
 ;;;   within an index register, again with optional scaling.
 
 ;;; Register Mapping -- Note "ikarus.compiler.intel-assembly.sls"
-;; Use C CalleE-save regs to ease FFI calls
+;; Use C CalleR-save (callE scratch) regs to ease FFI calls
 ;;       Intel  ARM64
-;; AAR = %eax =	x20	accumulator and arguments count
-;; CPR = %edi =	x21	pointer to closure
-;; APR = %ebp =	x22	allocation pointer
-;; FPR = %esp =	x23	frame pointer register = stack frame pointer
-;; PCR = %esi =	x24	pointer to PCB: Process Control Block
-;;       %ecx = x25
-;;       %edx = x26
+;; AAR = %eax =	x9	accumulator and arguments count
+;; CPR = %edi =	x10	pointer to closure
+;; APR = %ebp =	x11	allocation pointer
+;; FPR = %esp =	x12	frame pointer register = stack frame pointer
+;; PCR = %esi =	x13	pointer to PCB: Process Control Block
+;;       %ecx = x14
+;;       %edx = x15
 
 ;; Note "INTEL-CPU-REGISTER/INDEX-MAP" in "ikarus.compiler.intel-assembly.sls"
 (define (intel->arm64-cpu-register-index idx)
-  (+ 1dx 19))
+  (+ 1dx 9))
 
   
 
