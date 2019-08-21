@@ -145,10 +145,80 @@
 ;;   are represented in the input by this sexp.  The LABEL-ADDRESS sexp is present in
 ;;   the input where the address is actually used.
 ;;
+
+;;; Intel registers used to hold temporary results:
+;;;	%eax %edi %ebx %edx %ecx %r8 %r9 %r10 %r11 %r14 %r15
+;;; Intel register names used in Vicare asm:
+;;; al		ah		bh		cl
+;;; eax		ebx		ecx		edx		esp
+;;; AAR		CPR		APR		FPR		PCR
+;;; AA-REGISTER			CP-REGISTER
+;;; AP-REGISTER			FP-REGISTER
+;;; PC-REGISTER
 
-;; Register Mapping
-;; @@@
+  
+;;; AArch64/ARMv8/ARM64 C call ABI
 
+;;; Note: Vicare Scheme stacks separate from C stack.
+
+;;;  Register usage: [Xn=>Double[64bits], Wn=>Word[32bits]]
+;;;   XZR:	Zero register -- reads zero, writes ignored
+;;;   X0-X7:	C argument/result registers;   calleR-save
+;;;   X8:	C address of structure result; calleR-save
+;;;   X9-X15	Scratch/Temp registers, calleR-save [calleE scratch]
+;;;   X16-X17 [IP0,IP1]: intra-procedure-call scratch registers (linker uses)
+;;;   X18:	Platform specific use [avoid]
+;;;   X19-X28	calleE-save
+;;;   X29=FP:	frame-pointer
+;;;   X30=LR:	link-register
+;;;   SP:	Stack Pointer [4 lower bits 0 -> 16-byte aligned]
+;;;   NZCV:	Status/flags Register [Neg/Zero/Carry/oVerflow]
+;;; [NB: r31 encodes as SP or XZR depending on instruction]
+;;; [NB: PC is _NOT_ a named register and is not directly available; use ADR/ADRP]
+
+;;; Floating Point Registers [D=Double[64],Q=Quad[128],W=Word[32],H=Half[16],B=Byte[8]]
+;;;   D0-D7	floating point arg/result; calleR-save
+;;;   D8-D15:	calleE-MUST-save
+;;;   D16-D31:	Scratch/Temp; calleR-save
+;;;   FPSR:	Floating Point Status Register
+
+;;; Float  values returned in D0-D7
+;;; Scalar values returned in X0-X7
+;;; Struct Addr in X8 [libffi does this!]
+
+;;; Struct return space alloc'ed by Caller and address is passed in X8
+
+;;; Alignment:
+;;;   double-floats & 64-bit integers are 8-byte aligned in structs
+;;;   double-floats & 64-bit integers are 8-byte aligned on the stack
+;;;   C Stack MUST be 16-byte/quad-word aligned (SP mod 16 == 0)
+
+;;; Addressing:
+;;;  Where the PC is read by an instruction to compute a PC-relative address,
+;;;   then its value is the address of THAT instruction. Unlike A32 and T32,
+;;;   there is _NO_ implied offset of 4 or 8 bytes.
+
+;;;  Any scalar 64-bit index register to be added to the 64-bit base register,
+;;;   with optional scaling of the index by the access size.
+;;;  Additionally, optional sign or zero-extension of a 32-bit value
+;;;   within an index register, again with optional scaling.
+
+;;; Register Mapping -- Note "ikarus.compiler.intel-assembly.sls"
+;; Use C CalleE-save regs to ease FFI calls
+;;       Intel  ARM64
+;; AAR = %eax =	x20	accumulator and arguments count
+;; CPR = %edi =	x21	pointer to closure
+;; APR = %ebp =	x22	allocation pointer
+;; FPR = %esp =	x23	frame pointer register = stack frame pointer
+;; PCR = %esi =	x24	pointer to PCB: Process Control Block
+;;       %ecx = x25
+;;       %edx = x26
+
+;; Note "INTEL-CPU-REGISTER/INDEX-MAP" in "ikarus.compiler.intel-assembly.sls"
+(define (intel->arm64-cpu-register-index idx)
+  (+ 1dx 19))
+
+  
 
 ;;;; syntax helpers
 
