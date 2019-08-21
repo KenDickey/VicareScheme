@@ -154,7 +154,7 @@
   (identifier-syntax 'assemble-sources))
 
 (define-syntax ($for-each/stx stx)
-  ;;Like FOR-HEACH, but expand the loop inline.   The "function" to be mapped must be
+  ;;Like FOR-EACH, but expand the loop inline.   The "function" to be mapped must be
   ;;specified by an identifier or lambda form because it is evaluated multiple times.
   ;;
   ;;This implementation:  is tail recursive,  assumes proper list arguments  of equal
@@ -1316,7 +1316,7 @@
 	   ;;of a "known" Scheme function that  was represented by a CODE-LOC struct;
 	   ;;an entry point in this very code object's machine code.
 	   ;;
-	   ;;Being an entry point: it the address  of a code object, to which we must
+	   ;;Being an entry point it is the address  of a code object, to which we must
 	   ;;add an  offset.  We  generate a LABEL-ADDRRESS  entry; later  this entry
 	   ;;will be stored in the relocation vector of the code object.
 	   ;;
@@ -1717,7 +1717,6 @@
 				 ac)))))))
 
 ;;; --------------------------------------------------------------------
-
   (define-syntax (case-mem/reg stx)
     (syntax-case stx (mem reg else)
       ((_ ?operand
@@ -1866,7 +1865,7 @@
       ;;
       ;;   (?assembly-instruction-mnemonic ?operand ...)
       ;;
-      ;;?AC is  an identifier  user as  second formal  argument in  the instruction's
+      ;;?AC is  an identifier  used as  second formal  argument in  the instruction's
       ;;conversion function.  It is bound to the accumulator list.
       ;;
       ;;The ?ARG  formals are  additional arguments  to the  instruction's conversion

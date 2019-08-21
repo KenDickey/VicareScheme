@@ -29,7 +29,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#ifdef __x86_64__
 extern int cpu_has_sse2();
+#endif
 static void register_handlers();
 static void register_alt_stack();
 
@@ -61,6 +63,7 @@ ikarus_main (int argc, char** argv, char* boot_file)
 {
   ikpcb_t *	pcb;
   int		repl_on_sigint	= 0;
+#ifdef __x86_64__
   if (! cpu_has_sse2()) {
     fprintf(stderr, "Vicare Scheme cannot run on your computer because\n");
     fprintf(stderr, "your CPU does not support the SSE2 instruction set.\n");
@@ -68,6 +71,7 @@ ikarus_main (int argc, char** argv, char* boot_file)
     fprintf(stderr, "minimum hardware requirements.\n");
     exit(EXIT_FAILURE);
   }
+#endif
   if (sizeof(mp_limb_t) != sizeof(long int))
     ik_abort("limb size does not match");
   if (mp_bits_per_limb != (8*sizeof(long int)))

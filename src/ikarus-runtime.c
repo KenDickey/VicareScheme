@@ -411,10 +411,9 @@ ik_make_pcb (void)
    *    stack_base    frame_pointer            frame_base
    *         v             v                       v
    *  lo mem |-------------+-----------------------| hi mem
-   *                  |....|
+   *                  |....|xxxx|xxxxxx|xxx|xxxx|xx|
    *                           Scheme stack
-   *
-   * Notice how "pcb->frame_base" references a  word that is one-off the
+   *   * Notice how "pcb->frame_base" references a  word that is one-off the
    * end of the stack segment; so the first word in the stack is:
    *
    *    pcb->frame_base - wordsize
