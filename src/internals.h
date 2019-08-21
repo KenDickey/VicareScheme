@@ -608,7 +608,7 @@ typedef struct ik_ptr_page_t {
 } ik_ptr_page_t;
 
 /* For  more  documentation  on  the PCB  structure:  see  the  function
-   "ik_make_pcb()". */
+   "ik_make_pcb()" in file "ikarus-runtime.c". */
 typedef struct ikpcb_t {
   /* The  first locations  may	be  accessed by	 some  compiled code  to
      perform overflow/underflow ops. */
