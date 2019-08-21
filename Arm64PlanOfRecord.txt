@@ -1,0 +1,37 @@
+
+OK. So plan is to get basic Vicare up on Aarch64/ARM64v8 Linux.
+
+Vicare is complex, but very well documented.
+
+What is the simplest thing that will work?
+
+We want to keep/use system runtime structure(s).
+
+Bootstrap: Can we start with aliased registers and the x86 mnemonics,
+  but gen arm code?  Non-optimal, but gets Vicare Scheme on Arm64..
+
+Differences between arm64 & x86_64 are many:
+  arm64 is Harvard (load/store) RISC; Intel CISC
+  more registers; immeadiate values sized differently
+  FP & LP registers, not stack locations
+
+@Need to verify ability to cross-compile bootstrap files.. (else Guile?)
+
+Major (@)
+@ikarus-enter.S
+@ikarus.compiler.intel-assembler.sls
+
+Check (@)
+@ikarus.compiler.common-assembly-subroutines.sls
+?ikarus.compiler.intel-assembly.sls?
+?ikarus.compiler.pass-impose-evaluation-order.sls?
+?ikaris.compiler.pass-flatten-codes.sls?
+?ikarus.compiler.core-primitive-operations.sls?
+?ikarus.compiler.common-assembly-subroutines.sls?
+?ikarus.compiler.pass-assign-frame-sizes.sls?
+?ikarus.compiler.pass-color-by-chaitin.sls?
+
+Minor (?)
+?ikarus.compiler.sls? -> assemble-sources
+?ikarus.makefile.sls? -> add/parameterize arm64 files
+
