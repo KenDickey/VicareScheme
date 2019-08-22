@@ -504,7 +504,8 @@ L_back:
 ##   This code MUST correspond with defs in file
 ##     "ikarus.compiler.aarch64-assembler.sl"
 
-## C call ABI:
+## AARCH64 C call ABI
+
 ##  Register usage: [Xn=>Double[64bits], Wn=>Word[32bits]]
 ##   XZR:	Zero register -- reads zero, writes ignored
 ##   X0-X7:	C argument/result registers;   calleR-save
@@ -547,6 +548,7 @@ _ik_asm_enter:
 # c integer parameters come in registers:
 #     %x0..%x7
 # return value registers are %x0..%x7 and %x8
+# CalleR-save regs x9..x15 used by Vicare
 # calleE-save registers:
 #     %x19..%x28 are calleE-save
 # Frame-Pointer: %x29
@@ -554,29 +556,32 @@ _ik_asm_enter:
 # Stack Pointer: 31 -- Stack is 16 byte aligned [4 lower bits zero]
 # PC is NOT a named register	
 
-	@@@ FIXME: ARMify @@@
+#       Intel  ARM64
+# AAR = %eax =  x9	accumulator and arguments count
+# CPR = %edi = x10	pointer to closure
+# APR = %ebp = x11	allocation pointer
+# FPR = %esp = x12	frame pointer register = stack frame pointer
+# PCR = %esi = x13	pointer to PCB: Process Control Block
+#       %ecx = x14
+#       %edx = x15      [code pointer reg]
+
 	
   # First, save all callee-save registers
-  mov %rbp,  -8(%rsp)      # preserve
-  mov %rbx,  -16(%rsp)     # preserve
-  mov %r12,  -24(%rsp)     # preserve
-  mov %r13,  -32(%rsp)     # preserve
-  mov %r14,  -40(%rsp)     # preserve
-  mov %r15,  -48(%rsp)     # preserve
+#@@ Ignored -  Unused by Vicare
 
-  # closure pointer is the 4th arg, or %rcx
-  # argcount is the third arg, or %rdx
-  # code is the second arg, or  %rsi
-  # pcb is the first arg, or    %rdi
-  # return point is at       0(%rsp)
+  # closure pointer is the 4th arg, or x3
+  # argcount is the third arg, or      x2
+  # code is the second arg, or         x1
+  # pcb is the first arg, or           x0
+  # return point is at          LR
 
-  mov %rdx, %rax     # set up arg count
-  mov %rsi, %rdx     # move code pointer to %rdx
-  mov %rdi, %rsi     # move pcb into pcb-register (%rsi)
-  mov %rcx, %rdi     # move closure pointer into cpr
-  mov 0(%rsi), %rbp  # allocation pointer is at 0(pcb)
-  sub $64, %rsp         # 64 for alignment
-  mov %rsp, 48(%rsi)    # save esp in pcb->system_stack
+  mov x9,  x3     # set up arg count AAR
+  mov x15, x1     # move code pointer to CPR
+  mov x13, x0     # move pcb into pcb-register PCR
+  mov x10, x3     # move closure pointer into CPR
+  ldr x11, x13    # allocation pointer is at 0(pcb)
+##  subi SP, SP, 64 # 64 for alignment ??
+  stpr SP,XZR, [x13, 48]    # save esp in pcb->system_stack
   mov 16(%rsi), %rsp    # load scheme stack from pcb->frame_pinter
   jmp L_call
   .quad 8
