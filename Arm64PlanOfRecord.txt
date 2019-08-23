@@ -10,6 +10,11 @@ We want to keep/use system runtime structure(s).
 Bootstrap: Can we start with aliased registers and the x86 mnemonics,
   but gen arm code?  Non-optimal, but gets Vicare Scheme on Arm64..
 
+Excellect documentation on Scheme Call pattern in the Vicare.pdf doc:
+   Chapter 16: Introduction to execution machinery 
+   starting on page 881
+NB: need to distinguish, e.g., RET instruction in Scheme and C contexts.
+
 Differences between arm64 & x86_64 are many:
   arm64 is Harvard (load/store) RISC; Intel CISC
   more registers; immeadiate values sized differently
