@@ -15,6 +15,8 @@ Excellect documentation on Scheme Call pattern in the vicare-scheme.pdf doc:
    starting on page 881
 NB: need to distinguish, e.g., RET instruction in Scheme and C contexts.
 
+FFI & primop codegen: must spread flonum args to float regs, x8 for alloc'ed struct fillin.
+
 Differences between arm64 & x86_64 are many:
   arm64 is Harvard (load/store) RISC; Intel CISC
   more registers; immeadiate values sized differently
