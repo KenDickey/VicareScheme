@@ -44,23 +44,25 @@
 // c integer parameters come in registers:
 //     %x0..%x7
 // return value registers are %x0..%x7 and %x8
-// CalleR-save regs x9..x15 used by Vicare
+// CalleR-save regs x9..x15 (UNused by Vicare)
 // CalleE-save registers:
-//     %x19..%x28 are calleE-save
-// Frame-Pointer: %x29
-// Link Register: %x30	
-// Stack Pointer: 31 -- Stack is 16 byte aligned [4 lower bits zero]
+//     %x19..%x28 are calleE-save (used by Vicare)
+// C Frame-Pointer: %x29
+// C Link Register: %x30	
+// C Stack Pointer: 31 -- Stack is 16 byte aligned [4 lower bits zero]
 // PC is NOT a named register
 // SP is used by C but NOT by Scheme [FPR]
 
-//       Intel  ARM64
-// AAR = %eax =  x9	accumulator and arguments count
-// CPR = %edi = x10	pointer to closure
-// APR = %ebp = x11	allocation pointer
-// FPR = %esp = x12	frame pointer register = Scheme stack frame pointer
-// PCR = %esi = x13	pointer to PCB: Process Control Block
-//       %ecx = x14
-//       %edx = x15      [code pointer reg]
+// Scm   Intel  ARM64
+// AAR = %eax = x19	accumulator and arguments count
+// CPR = %edi = x20	pointer to closure
+// APR = %ebp = x21	allocation pointer
+// FPR = %esp = x22	frame pointer register = Scheme stack frame pointer
+// PCR = %esi = x23	pointer to PCB: Process Control Block
+//       %ecx = x24
+//       %edx = x25      [code pointer reg]
+//	 %ebx = x26
+//	        x27, x28 temps
 
 // Process Control Block: see "src/internals.h"
 // typedef struct ikpcb_t { 
@@ -80,15 +82,27 @@
 //   ...                            ...
 //   ... }
 
+.align 16
+ik_asm_enter:
+_ik_asm_enter:
+	
+
+// First, push all calleE-save registers on C Stack (reverse order)
+  STP d14, d15, [SP, #-16]! // float regs d8..d15
+  STP d12, d13, [SP, #-16]! 
+  STP d10, d11, [SP, #-16]! 
+  STP  d8,  d9, [SP, #-16]! 
+  STP x27, x28, [SP, #-16]! // scalar regs x19..x28
+  STP x25, x26, [SP, #-16]!  
+  STP x23, x24, [SP, #-16]! // x23=PCR
+  STP x21, x22, [SP, #-16]! // x21=APR, x22=FPR
+  STP x19, x20, [SP, #-16]! // x19=AAR, x20=CPR
+
 // Note: stack grows down toward lower memory, so	
 //   stack slot 2         -> [%sp, #-16] (neg offset)
 // But structures are UP from base, so	
 //   ikpcb->frame_pointer -> [%pcb, #16] (pos offset) 	
 
-.align 16
-ik_asm_enter:
-_ik_asm_enter:
-	
   // Called by C proc ik_exec_code() in "ikarus-exec.c"
   // closure pointer is the 4th arg, or x3
   // argcount is the third arg, or      x2
@@ -97,39 +111,50 @@ _ik_asm_enter:
   // C return point is in         LR = x30
   // C stack pointer in x31	
 
-  mov x10, x3     // CPR gets closure pointer
-  mov x9,  x2	  // AAR gets arg count
-  mov x15, x1     // capture code pointer
-  mov x13, x0     // PCR gets pointer to pcb
-  ldr x11, [x13]  // allocation pointer is at 0(pcb)
-  str SP,  [x13, #48] // save C stack pointer in pcb->system_stack
-  ldr x12, [x13, #16] // load scheme stack from  pcb->frame_pointer
-  b   L_call
+  MOV x19, x2	  // AAR gets arg count
+  MOV x20, x3     // CPR gets closure pointer
+  MOV x25, x1     // capture code pointer ;; @@seems unused..
+  MOV x23, x0     // PCR gets pointer to pcb
+  LDR x21, [x23]  // allocation pointer is at 0(pcb)
+  STR SP,  [x23, #48] // save C stack pointer in pcb->system_stack
+  LDR x22, [x23, #16] // load scheme stack from  pcb->frame_pointer
+  B   L_call
   .quad 8
   .quad 0
 L_multivalue_label: // FIXME
   .quad  L_multivalue_underflow
   .quad 0
 L_call:
-  br x1     // goooooooo code pointer
+  BR x1     // goooooooo code pointer
   // now we're back
 ik_underflow_handler:
 _ik_underflow_handler:
-  str  x9, [x12, #-16] // store return value from AAR (stack slot 2)
+  STR  x19, [x22, #-16] // store return value from AAR (stack slot 2)
 //@@CheckMe@@ orig code has #-8 as return value	(rvcount=1) ??
-  mov  x9, x0          // C's x0 gets AAR as return value
+  MOV  x19, x0          // C's x0 gets AAR as return value
 L_do_underflow:
-  str x12, [x13, #16]  // store Scheme stack pointer in pcb->frame_pointer
-  str x11, [x13]       // store allocation pointer   in pcb->allocation_pointer
+  STR x22, [x23, #16]  // store Scheme stack pointer in pcb->frame_pointer
+  STR x21, [x23]       // store allocation pointer   in pcb->allocation_pointer
 // assert SP = [x13, #48] as Scheme did not touch SP [until multi-proc => multi PCBs]
-  ldr SP,  [x13, #48]   // restore system C stack from pcb->system_stack 
+  LDR SP,  [x23, #48]   // restore system C stack from pcb->system_stack 
 
+// Restore calleE save registers
+  LDP  x19, x20, [SP], #16 // pop in (reverse (reversed order))
+  LDP  x21, x22, [SP], #16 //    = in-order
+  LDP  x23, x24, [SP], #16
+  LDP  x25, x26, [SP], #16
+  LDP  x27, x28, [SP], #16
+  LDP   d8,  d9, [SP], #16
+  LDP  d10, d11, [SP], #16
+  LDP  d12, d13, [SP], #16
+  LDP  d14, d15, [SP], #16	
+	
 // LP still holds return address for C code, so
   ret      // back to C, which handled the underflow 
 multivalue_underflow:
 L_multivalue_underflow:
-  addi x12, #8  // Pop 1 double from Scheme Stack ???@@@CHECKME@@@???
-  b L_do_underflow
+  addi x22, #8  // Pop 1 double from Scheme Stack ???@@@CHECKME@@@???
+  B L_do_underflow
 
 // ------------------------------------------------------------
 
@@ -149,28 +174,28 @@ _ik_asm_reenter:
   // pcb is the first arg       x0
   // return point is at         LR
 
-  mov x9,  x2      // third arg  -> argc         AAR
-  mov x12, x1      // second arg -> scheme stack FPR
-  mov x13, x0      // first arg  -> pcb addr     PCR
-  ldr x11, [x13]   // allocation pointer is at 0(pcb)
+  MOV x19, x2      // third arg  -> argc         AAR
+  MOV x22, x1      // second arg -> scheme stack FPR
+  MOV x23, x0      // first arg  -> pcb addr     PCR
+  LDR x21, [x23]   // allocation pointer is at 0(pcb)
 
-  str SP, [x13, #48]    // save esp in pcb->system_stack
-  cmp x0, #-8           // (-1 << 4) => 1 arg
-  b.ne L_multi_value_reentry
+  STR  SP, [x23, #48]    // save esp in pcb->system_stack
+  CMPI x0, #-8           // (-1 << 4) => 1 arg
+  B.ne L_multi_value_reentry
 
 L_single_value_reentry:
-  ldr x0, [x12, #-8]   // Result from Scheme Stack
+  ldr x0, [x22, #-8]   // Result from Scheme Stack
 // Intel ret loads PC from FPR and increments FPR by 8,
 // so on aarch64 this should be:	
-  mov  IPO, x12
-  addi x12, x12, #8
-  b    IP0
+  MOV  IPO, x12
+  ADDI x12, x12, #8
+  B    IP0
 
 L_multi_value_reentry:
-  ldr IP0, [x12]  // code addr on top of Scheme Stack
+  LDR IP0, [x12]  // code addr on top of Scheme Stack
 // DISP_MULTIVALUE_RP = -(wordsize + CALL-INSTRUCTION-SIZE)
-  ldr IP1, [IP0, #-18] // ?? WTF ?? @@@CHECKME@@@ 
-  br  IP1
+  LDR IP1, [IP0, #-18] // ?? WTF ?? @@@CHECKME@@@ 
+  BR  IP1
 
 
 // ------------------------------------------------------------
@@ -198,69 +223,56 @@ L_multi_value_reentry:
 ik_foreign_call:
 _ik_foreign_call:
   // Store the Frame Pointer Register into "pcb->frame_pointer".
-  str x12, [x13, #16]    // (movl fpr (pcb-ref 'frame-pointer))
+  STR x12, [x13, #16]    // (movl fpr (pcb-ref 'frame-pointer))
   // Store the Allocation Pointer Register into "pcb->allocation_pointer".
-  str x11, [x13]         // (movl apr (pcb-ref 'allocation-pointer))
+  STR x11, [x13]         // (movl apr (pcb-ref 'allocation-pointer))
   // Save the Frame Pointer Register (FPR, %esp) into RBX.  We will
   // need it later to transfer the arguments from the Scheme stack to
   // the C stack.
-  mov x15, x12           // (movl fpr ebx)
+  MOV x15, x12           // (movl fpr ebx)
   // Store in %rsp the C stack from "pcb->system_stack".
   // NB: Should be same number!! [assert]
-  ldr SP, [x13, #48]     // (movl (pcb-ref 'system-stack) esp)
+  LDR SP, [x13, #48]     // (movl (pcb-ref 'system-stack) esp)
 
   // Here SP references the last used word on the C stack: the
   // "old top of C stack".
 
-  // CalleR save regs are D0..D7, X0..X15 -- save on C stack
-  stp  d6,  d7, [SP, #-16]! // push register pairs in reversed order
-  stp  d4,  d5, [SP, #-16]!	
-  stp  d2,  d3, [SP, #-16]!
-  stp  d0,  d1, [SP, #-16]!		
-  stp x14, x15, [SP, #-16]!
-  stp x12, x13, [SP, #-16]! // x12=FPR, x13=PCR
-  stp x10, x11, [SP, #-16]! // x10=CPR, x11=APR
-  stp  x8,  x9, [SP, #-16]! // x9=AAR
-  stp  x6,  x7, [SP, #-16]!
-  stp  x4,  x5, [SP, #-16]!	
-  stp  x2,  x3, [SP, #-16]!
-  stp  x0,  x1, [SP, #-16]! // SP now -= 192		
 
   // If there are no arguments: jump to the appropriate label, the only
   // argument is the PCB addres in %rdi/CPR/x10
-  cmpi x9, #0
+  CMPI x9, #0
   B.eq L_zero_args
 
   // There is one argument: jump to the appropriate label.
-  cmpi x9, #-8
+  CMPI x9, #-8
   B.eq L_one_arg
 
   // There are two arguments: jump to the appropriate label.
-  cmpi x9, #-16
+  CMPI x9, #-16
   B.eq L_two_args
 
   // There are three arguments: jump to the appropriate label.
-  cmpi x9, #-24
+  CMPI x9, #-24
   B.eq L_three_args
 
   // There are four arguments: jump to the appropriate label.
-  cmpi x9, #-32
+  CMPI x9, #-32
   B.eq L_four_args
 
   // There are five arguments: jump to the appropriate label.
-  cmpi x9, #-40
+  CMPI x9, #-40
   B.eq L_five_args
 
   // There are six arguments: jump to the appropriate label.
-  cmpi x9, #-48
+  CMPI x9, #-48
   B.eq L_six_args
 
   // There are seven arguments: jump to the appropriate label.
-  cmpi x9, #-56
+  CMPI x9, #-56
   B.eq L_seven_args
 
   // There are eight arguments: jump to the appropriate label.
-  cmpi x9, #-64
+  CMPI x9, #-64
   B.eq L_eight_args
 
 ;;; 	@@@@ intel->arm transition marker @@@@
@@ -508,19 +520,6 @@ L_zero_args:
 L_set:                   // (label Lset)
   call *%r12             // (call cpr)
 L_back:
-// CalleR save regs are D0..D7, X0..X15 -- restore from C stack
-  ldp  x0,  x1, [SP], #16 // pop in (reverse (reversed order)) = in-order
-  ldp  x2,  x3, [SP], #16
-  ldp  x4,  x5, [SP], #16	
-  ldp  x6,  x7, [SP], #16
-  ldp  x8,  x9, [SP], #16 //  x9=AAR
-  ldp x10, x11, [SP], #16 // x10=CPR, x11=APR
-  ldp x12, x13, [SP], #16 // x12=FPR, x13=PCR
-  ldp x14, x15, [SP], #16
-  ldp  d0,  d1, [SP], #16		
-  ldp  d2,  d3, [SP], #16
-  ldp  d4,  d5, [SP], #16	
-  ldp  d6,  d7, [SP], #16 // SP now += 192
 	
   // Restore PCB from %r13.
   movq %r13, %rsi
