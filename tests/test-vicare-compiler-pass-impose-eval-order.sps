@@ -1245,7 +1245,7 @@
 		     ;;continuation.
 		     (asmcall mset kont-obj_0 (constant 3) %esp)
 		     ;;Store  in   the  continuation  object  the   number  of  bytes
-		     ;;representing the total size of the freezed stack frames.
+		     ;;representing the total size of the frozen stack frames.
 		     (asmcall mset kont-obj_0 (constant 11) (asmcall int- base_0 %esp))
 		     ;;Prepend  the new  continuation object  to the  linked list  of
 		     ;;"next process continuations" in the PCB.

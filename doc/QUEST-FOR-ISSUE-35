@@ -1,5 +1,5 @@
 
-                      The quest to solve Issue #25
+                      The quest to solve Issue #35
                       ============================
 
                              by Marco Maggi
@@ -86,7 +86,7 @@ situations:
      |----------------------|                     --
        ... other frames ...                       .
      |----------------------|                     .
-     |     local value 0    |                     . freezed
+     |     local value 0    |                     . frozen
      |----------------------|                     . frames
      |     local value 0    |                     .
      |----------------------|                     .

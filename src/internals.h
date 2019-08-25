@@ -941,8 +941,8 @@ struct ik_gc_avoidance_collection_t {
    from  it "continuation_primary_tag"  and  the result  is an  untagged
    pointer to "ikcont_t".  This struct is  a useful helper to be used in
    place of the IK_REF getter. */
-/* The  following   picture  shows  two   stack  frames  freezed   in  a
- * continuation object.  Freezed frame 0 is on the top of freezed stack.
+/* The  following   picture  shows  two   stack  frames  frozen   in  a
+ * continuation object.  Frozen frame 0 is on the top of frozen stack.
  *
  *            high memory
  *    |                        |
@@ -968,14 +968,14 @@ typedef struct ikcont_t {
   /* The field TAG is set to the constant value "continuation_tag". */
   ikptr_t		tag;
   /* The field TOP is a raw memory pointer referencing a machine word on
-     the top  freezed frame; such  machine word contains the  address of
+     the top  frozen frame; such  machine word contains the  address of
      the  code execution  return point  of this  continuation, in  other
      words: the address of the next assembly instruction to execute when
      returning to this continuation. */
   ikptr_t		top;
-  /* The field  SIZE is  the number  of bytes in  all the  freezed stack
+  /* The field  SIZE is  the number  of bytes in  all the  frozen stack
      frames  this continuation  references.  It  is the  sum of  all the
-     freezed frame sizes. */
+     frozen frame sizes. */
   ikuword_t		size;
   /* Every  "ikcont_t"   struct  is   a  node  in   a  linked   list  of
      continuations.  The field NEXT is 0 or a reference (tagged pointer)

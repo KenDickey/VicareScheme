@@ -881,7 +881,7 @@ continuations non}.
 |  return addr to top  |         .
 |----------------------|         .
 |    argument A == 1   |         .
-|----------------------|         . freezed
+|----------------------|         . frozen
 | return addr to alpha |         . frames
 |----------------------|         .
 |    argument B == 1   |         .
@@ -893,10 +893,10 @@ continuations non}.
 |                      |
        low memory
 @end example
-@caption{Region of stack freezed by @code{call/cc}.}
+@caption{Region of stack frozen by @code{call/cc}.}
 @end float
 
-The continuation object references the array of freezed words on the
+The continuation object references the array of frozen words on the
 stack, keeping a reference to the value of @fpr{} at the time of
 creation.  The continuation object is also a node in a simply linked
 list of continuation objects, whose head is stored in a field of the
@@ -946,7 +946,7 @@ Prepare the application of the receiver closure to the escape function:
 move the reference to the receiver closure in the @cpr{}; move the
 address of the underflow handler on the stack and set the @fpr{} to
 reference it; set the value of @code{pcb->frame_base} to exclude the
-freezed frames from the stack segment;
+frozen frames from the stack segment;
 @ref{fig:MCN_callcc_before_receiver, machinery continuations non}.
 
 @float Figure,fig:MCN_callcc_before_receiver
@@ -959,7 +959,7 @@ freezed frames from the stack segment;
 |  return addr to top  |                     .
 |----------------------|                     .
 |    argument A == 1   |                     .
-|----------------------|                     . freezed
+|----------------------|                     . frozen
 | return addr to alpha |                     . frames
 |----------------------|                     . in K_1
 |    argument B == 1   |                     .
@@ -1001,7 +1001,7 @@ continuations non}.
 |  return addr to top  |                     .
 |----------------------|                     .
 |    argument A == 1   |                     .
-|----------------------|                     . freezed
+|----------------------|                     . frozen
 | return addr to alpha |                     . frames
 |----------------------|                     . in K_1
 |    argument B == 1   |                     .
@@ -1037,12 +1037,12 @@ continuation object @math{K_2} referencing all the other frames,
 | ik_underflow_handler |
 |----------------------|                     --
 |  return addr to top  |                     .
-|----------------------|                     . freezed
+|----------------------|                     . frozen
 |    argument A == 1   |                     . frames
 |----------------------|                     . in K_2
 | return addr to alpha |                     .
 |----------------------|                     --
-|    argument B == 1   |                     . freezed
+|    argument B == 1   |                     . frozen
 |----------------------|                     . frame
 | return addr to beta  | <- pcb->frame_base  . in K_1
 |----------------------|                     --
@@ -1088,12 +1088,12 @@ of the frame, @ref{fig:MCN_callcc_K1_copy, machinery continuations non}.
 | ik_underflow_handler |
 |----------------------|                     --
 |  return addr to top  |                     .
-|----------------------|                     . freezed
+|----------------------|                     . frozen
 |    argument A == 1   |                     . frames
 |----------------------|                     . in K_2
 | return addr to alpha |                     .
 |----------------------|                     --
-|    argument B == 1   |                     . freezed
+|    argument B == 1   |                     . frozen
 |----------------------|                     . frame
 | return addr to beta  | <- pcb->frame_base  . in K_1
 |----------------------|                     --
@@ -1130,12 +1130,12 @@ instruction.
 | ik_underflow_handler |
 |----------------------|                     --
 |  return addr to top  |                     .
-|----------------------|                     . freezed
+|----------------------|                     . frozen
 |    argument A == 1   |                     . frames
 |----------------------|                     . in K_2
 | return addr to alpha |                     .
 |----------------------|                     --
-|    argument B == 1   |                     . freezed
+|    argument B == 1   |                     . frozen
 |----------------------|                     . frame
 | return addr to beta  | <- pcb->frame_base  . in K_1
 |----------------------|                     --
@@ -1163,15 +1163,15 @@ continuation object @math{K_3} referencing all the other frames,
       high memory
 |                      |
 |----------------------|
-| ik_underflow_handler |                        freezed
+| ik_underflow_handler |                        frozen
 |----------------------|                     -- frame
 |  return addr to top  |                     .  in K_3
 |----------------------|                     --
-|    argument A == 1   |                     . freezed
+|    argument A == 1   |                     . frozen
 |----------------------|                     . frames
 | return addr to alpha |                     . in K_2
 |----------------------|                     --
-|    argument B == 1   |                     . freezed
+|    argument B == 1   |                     . frozen
 |----------------------|                     . frame
 | return addr to beta  | <- pcb->frame_base  . in K_1
 |----------------------|                     --
@@ -1216,7 +1216,7 @@ of the frame, @ref{fig:MCN_callcc_K2_copy, machinery continuations non}.
       high memory
 |                      |
 |----------------------|
-| ik_underflow_handler |                        freezed
+| ik_underflow_handler |                        frozen
 |----------------------|                     -- frames
 |  return addr to top  |                     .  in K_3
 |----------------------|                     --
@@ -1224,7 +1224,7 @@ of the frame, @ref{fig:MCN_callcc_K2_copy, machinery continuations non}.
 |----------------------|                     . frames
 | return addr to alpha |                     . in K_2
 |----------------------|                     --
-|    argument B == 1   |                     . freezed
+|    argument B == 1   |                     . frozen
 |----------------------|                     . frame
 | return addr to beta  | <- pcb->frame_base  . in K_1
 |----------------------|                     --
@@ -1258,7 +1258,7 @@ instruction.
       high memory
 |                      |
 |----------------------|
-| ik_underflow_handler |                        freezed
+| ik_underflow_handler |                        frozen
 |----------------------|                     -- frames
 |  return addr to top  |                     .  in K_3
 |----------------------|                     --
@@ -1266,7 +1266,7 @@ instruction.
 |----------------------|                     . frames
 | return addr to alpha |                     . in K_2
 |----------------------|                     --
-|    argument B == 1   |                     . freezed
+|    argument B == 1   |                     . frozen
 |----------------------|                     . frame
 | return addr to beta  | <- pcb->frame_base  . in K_1
 |----------------------|                     --
@@ -1313,7 +1313,7 @@ of the frame, @ref{fig:MCN_callcc_K3_copy, machinery continuations non}.
       high memory
 |                      |
 |----------------------|
-| ik_underflow_handler |                        freezed
+| ik_underflow_handler |                        frozen
 |----------------------|                     -- frames
 |  return addr to top  |                     .  in K_3
 |----------------------|                     --
@@ -1321,7 +1321,7 @@ of the frame, @ref{fig:MCN_callcc_K3_copy, machinery continuations non}.
 |----------------------|                     . frames
 | return addr to alpha |                     . in K_2
 |----------------------|                     --
-|    argument B == 1   |                     . freezed
+|    argument B == 1   |                     . frozen
 |----------------------|                     . frame
 | return addr to beta  | <- pcb->frame_base  . in K_1
 |----------------------|                     --
@@ -1353,7 +1353,7 @@ already in the @aar{}: it executes a @code{ret} Assembly instruction.
       high memory
 |                      |
 |----------------------|
-| ik_underflow_handler |                        freezed
+| ik_underflow_handler |                        frozen
 |----------------------|                     -- frames
 |  return addr to top  |                     .  in K_3
 |----------------------|                     --
@@ -1361,7 +1361,7 @@ already in the @aar{}: it executes a @code{ret} Assembly instruction.
 |----------------------|                     . frames
 | return addr to alpha |                     . in K_2
 |----------------------|                     --
-|    argument B == 1   |                     . freezed
+|    argument B == 1   |                     . frozen
 |----------------------|                     . frame
 | return addr to beta  | <- pcb->frame_base  . in K_1
 |----------------------|                     --
@@ -1443,7 +1443,7 @@ continuations escape}.
 | ik_underflow_handler |
 |----------------------|         --
 |  return addr to top  |         .
-|----------------------|         . freezed
+|----------------------|         . frozen
 |    argument A == 1   |         . frames
 |----------------------|         .
 | return addr to alpha | <- FPR  .
@@ -1453,10 +1453,10 @@ continuations escape}.
 |                      |
        low memory
 @end example
-@caption{Region of stack freezed by @code{call/cc}.}
+@caption{Region of stack frozen by @code{call/cc}.}
 @end float
 
-The continuation object references the array of freezed words on the
+The continuation object references the array of frozen words on the
 stack, keeping a reference to the value of @fpr{} at creation time.  The
 continuation object is also a node in a simply linked list of
 continuation objects, whose head is stored in a field of the @pcb{}:
@@ -1505,7 +1505,7 @@ Prepare the application of the receiver closure to the escape function:
 the reference to the receiver closure is moved in the @cpr{}; the
 address of the underflow handler is moved on the stack and the @fpr{} is
 set to reference it; the value of @code{pcb->frame_base} is set to
-exclude the freezed frames from the stack segment;
+exclude the frozen frames from the stack segment;
 @ref{fig:MCE_callcc_before_receiver, machinery continuations escape}.
 
 @float Figure,fig:MCE_callcc_before_receiver
@@ -1516,7 +1516,7 @@ exclude the freezed frames from the stack segment;
 | ik_underflow_handler |
 |----------------------|                     --
 |  return addr to top  |                     .
-|----------------------|                     . freezed
+|----------------------|                     . frozen
 |    argument A == 1   |                     . frames
 |----------------------|                     . in K_1
 | return addr to alpha | <- pcb->frame_base  .
@@ -1550,7 +1550,7 @@ escape}.
 | ik_underflow_handler |
 |----------------------|                     --
 |  return addr to top  |                     .
-|----------------------|                     . freezed
+|----------------------|                     . frozen
 |    argument A == 1   |                     . frames
 |----------------------|                     . in K_1
 | return addr to alpha | <- pcb->frame_base  .
@@ -1585,7 +1585,7 @@ empty word, finally a @code{call} Assembly instruction is executed,
 | ik_underflow_handler |
 |----------------------|                     --
 |  return addr to top  |                     .
-|----------------------|                     . freezed
+|----------------------|                     . frozen
 |    argument A == 1   |                     . frames
 |----------------------|                     . in K_1
 | return addr to alpha | <- pcb->frame_base  .
@@ -1621,7 +1621,7 @@ address below the @code{pcb->frame_base},
 | ik_underflow_handler |
 |----------------------|                     --
 |  return addr to top  |                     .
-|----------------------|                     . freezed
+|----------------------|                     . frozen
 |    argument A == 1   |                     . frames
 |----------------------|                     . in K_1
 | return addr to alpha | <- pcb->frame_base  .
@@ -1661,10 +1661,10 @@ continuation object @math{K_2} referencing all the other frames,
 |                      |
 |----------------------|
 | ik_underflow_handler |
-|----------------------|                     -- freezed
+|----------------------|                     -- frozen
 |  return addr to top  |                     .  frame K_2
 |----------------------|                     --
-|    argument A == 1   |                     . freezed
+|    argument A == 1   |                     . frozen
 |----------------------|                     . frame
 | return addr to alpha | <- pcb->frame_base  . in K_1
 |----------------------|                     --
@@ -1709,10 +1709,10 @@ escape}.
 |                      |
 |----------------------|
 | ik_underflow_handler |
-|----------------------|                     -- freezed
+|----------------------|                     -- frozen
 |  return addr to top  |                     .  frame K_2
 |----------------------|                     --
-|    argument A == 1   |                     . freezed
+|    argument A == 1   |                     . frozen
 |----------------------|                     . frame
 | return addr to alpha | <- pcb->frame_base  . in K_1
 |----------------------|                     --
@@ -1747,10 +1747,10 @@ Assembly instruction.
 |                      |
 |----------------------|
 | ik_underflow_handler |
-|----------------------|                     -- freezed
+|----------------------|                     -- frozen
 |  return addr to top  |                     .  frame K_2
 |----------------------|                     --
-|    argument A == 1   |                     . freezed
+|    argument A == 1   |                     . frozen
 |----------------------|                     . frame
 | return addr to alpha | <- pcb->frame_base  . in K_1
 |----------------------|                     --
@@ -1798,10 +1798,10 @@ escape}.
 |                      |
 |----------------------|
 | ik_underflow_handler |
-|----------------------|                     -- freezed
+|----------------------|                     -- frozen
 |  return addr to top  |                     .  frame K_2
 |----------------------|                     --
-|    argument A == 1   |                     . freezed
+|    argument A == 1   |                     . frozen
 |----------------------|                     . frame
 | return addr to alpha | <- pcb->frame_base  . in K_1
 |----------------------|                     --
@@ -1834,10 +1834,10 @@ already in the @aar{}: it executes a @code{ret} Assembly instruction.
 |                      |
 |----------------------|
 | ik_underflow_handler |
-|----------------------|                     -- freezed
+|----------------------|                     -- frozen
 |  return addr to top  |                     .  frame K_2
 |----------------------|                     --
-|    argument A == 1   |                     . freezed
+|    argument A == 1   |                     . frozen
 |----------------------|                     . frame
 | return addr to alpha | <- pcb->frame_base  . in K_1
 |----------------------|                     --
@@ -1854,7 +1854,7 @@ The underflow handler is reentered again with @cnull{} as ``next @pcb{}
 continuation'': this means the program is terminated, so the underflow
 handler does what is needed.
 
-We can understand that this mechanism of duplicating the freezed frames
+We can understand that this mechanism of duplicating the frozen frames
 can be repeated any number of times, allowing the execution flow to go
 back to a saved continuation any number of times.
 
@@ -2052,7 +2052,7 @@ aspect of the runtime behaviour, @ref{machinery simplifications,
 Simplification assumptions}.
 
 Local variables are put on the Scheme stack in such a way that the stack
-frame can be left immutable if it is freezed in a Scheme continuation
+frame can be left immutable if it is frozen in a Scheme continuation
 object.  Immutable local variables and mutable local variables, before
 the first mutation, are just put in machine words on the stack frame;
 mutable local variables after the first mutation are put in the single

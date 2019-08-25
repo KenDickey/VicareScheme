@@ -367,7 +367,7 @@
     ;;   |----------------------|                           --
     ;;     ... other frames ...                             .
     ;;   |----------------------|                           .
-    ;;   |      local value     |                           . freezed
+    ;;   |      local value     |                           . frozen
     ;;   |----------------------|                           . frames
     ;;   |      local value     |                           .
     ;;   |----------------------|                           .
@@ -393,7 +393,7 @@
     ;;  memory address equal to the assembly label "ik_underflow_handler".
     ;;
     ;;* A VAR struct representing a  location holding a reference to the continuation
-    ;;  object describing  the freezed frames.  Such continuation object  is also the
+    ;;  object describing  the frozen frames.  Such continuation object  is also the
     ;;  "next process continuation" in the PCB, that is: it is the value of the field
     ;;  "pcb->next_k".
     ;;
@@ -435,7 +435,7 @@
 	    ;;   |----------------------|                           --
 	    ;;     ... other frames ...                             .
 	    ;;   |----------------------|                           .
-	    ;;   |      local value     |                           . freezed
+	    ;;   |      local value     |                           . frozen
 	    ;;   |----------------------|                           . frames
 	    ;;   |      local value     |                           .
 	    ;;   |----------------------|                           .
@@ -468,7 +468,7 @@
 	    ;;   |----------------------|                     --
 	    ;;     ... other frames ...                       .
 	    ;;   |----------------------|                     .
-	    ;;   |      local value     |                     . freezed
+	    ;;   |      local value     |                     . frozen
 	    ;;   |----------------------|                     . frames
 	    ;;   |      local value     |                     .
 	    ;;   |----------------------|                     .

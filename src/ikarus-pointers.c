@@ -558,7 +558,7 @@ ikrt_with_local_storage (ikptr_t s_lengths, ikptr_t s_thunk, ikpcb_t * pcb)
     total_length += lengths[i] = IK_UNFIX(IK_ITEM(s_lengths, i));
   ik_enter_c_function(pcb);
   {
-    /* When  arriving  here  the  Scheme   stack  has  been  freezed  by
+    /* When  arriving  here  the  Scheme   stack  has  been  frozen  by
      * "ik_enter_c_function()", so the situation is as follows:
      *
      *          high memory

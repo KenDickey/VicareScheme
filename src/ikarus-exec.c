@@ -147,9 +147,9 @@ ik_exec_code (ikpcb_t * pcb, ikptr_t s_code, ikptr_t s_argcount, ikptr_t s_closu
     }
     if (framesize < kont->size) {
       /* The process continuation  we have to reinstate  references 2 or
-	 more  freezed  frames.  Mutate  S_KONT  to  reference only  the
-	 topmost  freezed frame  and  create a  new continuation  object
-	 referencing  the  rest of  the  freezed  frames.  Register  the
+	 more  frozen  frames.  Mutate  S_KONT  to  reference only  the
+	 topmost  frozen frame  and  create a  new continuation  object
+	 referencing  the  rest of  the  frozen  frames.  Register  the
 	 "rest" continuation as "next process continuation". */
       ikcont_t *	rest_kont   = (ikcont_t*)ik_unsafe_alloc(pcb, IK_ALIGN(continuation_size));
       ikptr_t	s_rest_kont = (ikptr_t)(((ikuword_t)rest_kont) | continuation_primary_tag);
@@ -181,7 +181,7 @@ ik_exec_code (ikpcb_t * pcb, ikptr_t s_code, ikptr_t s_argcount, ikptr_t s_closu
       pcb->next_k = kont->next;
     } else {
       /* The process continuation we have to reinstate references only 1
-	 freezed  frame.   Just  pop   S_KONT  from  the  "next  process
+	 frozen  frame.   Just  pop   S_KONT  from  the  "next  process
 	 continuations" list. */
       assert(framesize == kont->size);
       pcb->next_k = kont->next;
@@ -204,7 +204,7 @@ ik_exec_code (ikpcb_t * pcb, ikptr_t s_code, ikptr_t s_argcount, ikptr_t s_closu
      *        low memory
      *
      * and it is possible that there  are no return values on the Scheme
-     * stack.  Let's  assume that  the freezed  frame referenced  by the
+     * stack.  Let's  assume that  the frozen  frame referenced  by the
      * continuation object S_KONT is as follows:
      *
      *        high memory
@@ -221,7 +221,7 @@ ik_exec_code (ikpcb_t * pcb, ikptr_t s_code, ikptr_t s_argcount, ikptr_t s_closu
      *  |                      |
      *        low memory
      *
-     * We need to reinstate the  single freezed frame handing the return
+     * We need to reinstate the  single frozen frame handing the return
      * values to its function.
      */
     {
@@ -257,7 +257,7 @@ ik_exec_code (ikpcb_t * pcb, ikptr_t s_code, ikptr_t s_argcount, ikptr_t s_closu
 	uint8_t *	retval_src = ((uint8_t*)fbase)     + s_retval_count;
 	memmove(retval_dst, retval_src, -s_retval_count);
       }
-      /* Copy  to  this  stack  segment   the  freezed  frame  from  the
+      /* Copy  to  this  stack  segment   the  frozen  frame  from  the
        * continuation object S_KONT.
        *
        *       high memory

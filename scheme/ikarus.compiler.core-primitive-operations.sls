@@ -5771,7 +5771,7 @@
    ;;
    ;;where RECEIVER-FUNC  is a  local binding  evaluating to  a closure  object: this
    ;;closure accepts a  single argument being the continuation  object describing the
-   ;;freezed frames.
+   ;;frozen frames.
    ;;
    ;;Remember that:
    ;;
@@ -5859,7 +5859,7 @@
 	  ;;Set the  current Frame  Pointer Register  as address to  go back  to when
 	  ;;resuming the continuation.
 	  (asm 'mset kont-obj (KN off-continuation-top)  FP-REGISTER)
-	  ;;Set the number of bytes representing  the total size of the freezed stack
+	  ;;Set the number of bytes representing  the total size of the frozen stack
 	  ;;frames.
 	  (asm 'mset kont-obj (KN off-continuation-size) (asm 'int- base FP-REGISTER))
 	  ;;Prepend the new  continuation object to the linked list  of "next process
@@ -5886,7 +5886,7 @@
 	  ;;   |     local value 1    |                           .
 	  ;;   |----------------------|                           .
 	  ;;   |     local value 1    |                           .
-	  ;;   |----------------------|                           . freezed
+	  ;;   |----------------------|                           . frozen
 	  ;;   |   return address 1   |                           . frames
 	  ;;   |----------------------|                           .
 	  ;;   |     local value 0    |                           .

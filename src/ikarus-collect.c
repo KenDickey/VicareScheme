@@ -900,7 +900,7 @@ gc_finalize_guardians (gc_t* gc)
 static void
 collect_stack (gc_t* gc, ikptr_t top, ikptr_t end)
 /* This function is used to scan for live objects both the current stack
- * segment and  the array of  freezed stack frames referenced  by Scheme
+ * segment and  the array of  frozen stack frames referenced  by Scheme
  * continuation objects.
  *
  * Let's remember  how the current Scheme  stack looks when it  has some
@@ -951,7 +951,7 @@ collect_stack (gc_t* gc, ikptr_t top, ikptr_t end)
  *  |                      |
  *    low memory addresses
  *
- * now let's  remember how the  freezed frames in a  continuation object
+ * now let's  remember how the  frozen frames in a  continuation object
  * look:
  *
  *    high memory addresses
@@ -963,13 +963,13 @@ collect_stack (gc_t* gc, ikptr_t top, ikptr_t end)
  *  |----------------------|         --
  *  |     local value      |         .
  *  |----------------------|         .
- *  |     local value      |         . upper freezed frame
+ *  |     local value      |         . upper frozen frame
  *  |----------------------|         .
  *  |    return address    |         .
  *  |----------------------|         --
  *  |     local value      |         .
  *  |----------------------|         .
- *  |     local value      |         . topmost freezed frame
+ *  |     local value      |         . topmost frozen frame
  *  |----------------------|         .
  *  |    return address    | <- top  .
  *  |----------------------|         --
@@ -977,14 +977,14 @@ collect_stack (gc_t* gc, ikptr_t top, ikptr_t end)
  *    low memory addresses
  *
  * a continuation  object is  never empty:  it always  has at  least one
- * freezed frame.
+ * frozen frame.
  *
  * The argument END  is a raw memory pointer referencing  a machine word
  * past the lowest frame on the region to scan.
  *
  * When the region to scan is the current Scheme stack: the argument TOP
  * is "pcb->frame_pointer",  a raw memory  pointer.  When the  region to
- * scan  the array  of  freezed  frames in  a  continuation object:  the
+ * scan  the array  of  frozen  frames in  a  continuation object:  the
  * argument TOP is the value of the field TOP in the continuation object
  * data structure.
  *
@@ -1645,7 +1645,7 @@ gather_live_object_proc (gc_t* gc, ikptr_t X)
 
     case continuation_tag: {
       /* Scheme  continuation object.   The  object itself  goes in  the
-	 pointers meta page; the  referenced freezed Scheme stack frames
+	 pointers meta page; the  referenced frozen Scheme stack frames
 	 go in the data meta pages.
 
 	 NOTE Why  the Scheme continuation  object goes in  the pointers

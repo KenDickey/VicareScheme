@@ -237,16 +237,16 @@
     ;;In tail position:  applies FUNC-WITH-WINDERS to an escape  function which, when
     ;;evaluated, reinstates the current continuation.
     ;;
-    ;;The   argument   FREEZED-FRAMES   is   a   continuation   object   created   by
+    ;;The   argument   FROZEN-FRAMES   is   a   continuation   object   created   by
     ;;%PRIMITIVE-CALL/CF  referencing  the Scheme  stack  right  after entering  this
-    ;;function.  When FREEZED-FRAMES  arrives here, it has already  been prepended to
+    ;;function.  When FROZEN-FRAMES  arrives here, it has already  been prepended to
     ;;the list "pcb->next_k".
     ;;
     ;;The  return value  of  $FRAME->CONTINUATION  is a  closure  object which,  when
-    ;;evaluated, resumes the continuation represented by FREEZED-FRAMES.
+    ;;evaluated, resumes the continuation represented by FROZEN-FRAMES.
     ;;
-    (%primitive-call/cf (lambda (freezed-frames)
-			  (func-with-winders ($frame->continuation freezed-frames)))))
+    (%primitive-call/cf (lambda (frozen-frames)
+			  (func-with-winders ($frame->continuation frozen-frames)))))
 
   (module (%do-wind)
 

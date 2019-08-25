@@ -1060,7 +1060,7 @@ ik_stack_overflow (ikpcb_t* pcb)
  * execution completes.
  *
  * When the use  of the stack passes the redline:  this very function is
- * called;  the current  stack segment  is freezed  into a  continuation
+ * called;  the current  stack segment  is frozen  into a  continuation
  * object, registered in  the PCB as "next process  continuation"; a new
  * stack segment  is allocated and  initialised in  the same way  of the
  * old:
@@ -1073,7 +1073,7 @@ ik_stack_overflow (ikpcb_t* pcb)
  *
  * When  use of  the  new stack  segment is  finished:  the Scheme  code
  * execution returns to the  "ik_underflow_handler" label, which will do
- * what is  needed to retrieve the  freezed stack frames and  resume the
+ * what is  needed to retrieve the  frozen stack frames and  resume the
  * continuation.
  *
  * Notice that  "ik_stack_overflow()" is  always called by  the assembly
