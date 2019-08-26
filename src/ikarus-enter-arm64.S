@@ -1,7 +1,7 @@
 /* Ikarus Scheme -- A compiler for R6RS Scheme.
  * Copyright (C) 2006,2007,2008  Abdulaziz Ghuloum
  * Modified by Marco Maggi <marco.maggi-ipsu@poste.it>
- * Trasliterated 2019 for AArch64/ARMv8/arm64 by Ken.Dickey@whidbey.com
+ * Transliterated 2019 for AArch64/ARMv8/arm64 by Ken.Dickey@whidbey.com
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -53,6 +53,8 @@
 // C Stack Pointer: 31 -- Stack is 16 byte aligned [4 lower bits zero]
 // PC is NOT a named register
 // SP is used by C but NOT by Scheme [FPR]
+	
+//			C --> Scheme
 
 .align 16
 ik_asm_enter:
@@ -110,7 +112,7 @@ _ik_asm_enter:
 //       %ecx = x24
 //       %edx = x25      [code pointer reg]
 //	 %ebx = x26
-//	        x27, x28 temps
+//	        x27, x28 temps [r8..r15 ? use calleR-saves x8..x15 ??]
 
   MOV x19, x2	  // AAR gets arg count
   MOV x20, x3     // CPR gets closure pointer
@@ -151,13 +153,15 @@ L_do_underflow:
   LDP  d14, d15, [SP], #16	
 	
 // LP still holds return address for C code, so
-  ret      // back to C, which handled the underflow 
+  RET      // back to C, which handled the underflow
+// NB: arm RET instruction uses and mutates SP & LR regs
 multivalue_underflow:
 L_multivalue_underflow:
   ADDI x22, #8  // Pop 1 double from Scheme Stack ???@@@CHECKME@@@???
   B   L_do_underflow
 
 // ------------------------------------------------------------
+//			C -> Scheme
 
 .align 8
 ik_asm_reenter:
@@ -195,13 +199,16 @@ L_single_value_reentry:
 
 L_multi_value_reentry:
   LDR IP0, [x12]  // code addr on top of Scheme Stack
+	// @@ Calc multiple-entry return point from delta @@FIXME@@
+	// transfer mult arg values to scheme stack @@@FIXME@@@
 // DISP_MULTIVALUE_RP = -(wordsize + CALL-INSTRUCTION-SIZE)
   LDR IP1, [IP0, #-18] // ?? WTF ?? @@@CHECKME@@@ 
   BR  IP1
 
 
 // ------------------------------------------------------------
-
+//			Scheme -> C
+	
 // Call a C function From Scheme.   When entering this function:
 //
 // * %rsi/x13/PCR must contain the address of the PCB structure.
@@ -216,8 +223,8 @@ L_multi_value_reentry:
 // "ik_stack_overflow()", we enter with a Scheme stack segment
 // and come back with another Scheme stack segment.
 //
-// Note commentary in "ser/ikarus-runtime.c" proc "ik_stack_overflow()"
-// "ik_foreign_call" label set in "scheme/ikarus.compiler.pass-flatten-codes.sls"
+// Note commentary in "src/ikarus-runtime.c" proc "ik_stack_overflow()"
+// "ik_foreign_call" labels created in "scheme/ikarus.compiler.pass-flatten-codes.sls"
 // Doc in Chapter 16 in "vicare-scheme.pdf"	
 	
 	
