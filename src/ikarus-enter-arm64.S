@@ -1,6 +1,7 @@
 /* Ikarus Scheme -- A compiler for R6RS Scheme.
  * Copyright (C) 2006,2007,2008  Abdulaziz Ghuloum
  * Modified by Marco Maggi <marco.maggi-ipsu@poste.it>
+ * Trasliterated 2019 for AArch64/ARMv8/arm64 by Ken.Dickey@whidbey.com
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -53,40 +54,10 @@
 // PC is NOT a named register
 // SP is used by C but NOT by Scheme [FPR]
 
-// Scm   Intel  ARM64
-// AAR = %eax = x19	accumulator and arguments count
-// CPR = %edi = x20	pointer to closure
-// APR = %ebp = x21	allocation pointer
-// FPR = %esp = x22	frame pointer register = Scheme stack frame pointer
-// PCR = %esi = x23	pointer to PCB: Process Control Block
-//       %ecx = x24
-//       %edx = x25      [code pointer reg]
-//	 %ebx = x26
-//	        x27, x28 temps
-
-// Process Control Block: see "src/internals.h"
-// typedef struct ikpcb_t { 
-//  ikptr_t  allocation_pointer; /* offset =  0 * wordsize =  0
-//  ikptr_t  allocation_redline; /* offset =  1 * wordsize =  8
-//  ikptr_t  frame_pointer;	 /* offset =  2 * wordsize = 16
-//  ikptr_t  frame_base;	 /* offset =  3 * wordsize = 24
-//  ikptr_t  frame_redline;	 /* offset =  4 * wordsize = 32
-//  ikptr_t  next_k;		 /* offset =  5 * wordsize = 40
-//  ikptr_t  system_stack;	 /* offset =  6 * wordsize = 48
-//  ikptr_t  dirty_vector;	 /* offset =  7 * wordsize = 56
-//  ikptr_t  arg_list;		 /* offset =  8 * wordsize = 64
-//  ikptr_t  engine_counter;	 /* offset =  9 * wordsize = 72
-//  ikptr_t  interrupted;	 /* offset = 10 * wordsize = 80
-//  ikptr_t  base_rtd;		 /* offset = 11 * wordsize = 88
-//  ikptr_t  collect_key;	 /* offset = 12 * wordsize = 96
-//   ...                            ...
-//   ... }
-
 .align 16
 ik_asm_enter:
 _ik_asm_enter:
 	
-
 // First, push all calleE-save registers on C Stack (reverse order)
   STP d14, d15, [SP, #-16]! // float regs d8..d15
   STP d12, d13, [SP, #-16]! 
@@ -110,6 +81,36 @@ _ik_asm_enter:
   // pcb is the first arg, or           x0
   // C return point is in         LR = x30
   // C stack pointer in x31	
+
+
+// Process Control Block: see "src/internals.h"
+// typedef struct ikpcb_t { 
+//  ikptr_t  allocation_pointer; /* offset =  0 * wordsize =  0
+//  ikptr_t  allocation_redline; /* offset =  1 * wordsize =  8
+//  ikptr_t  frame_pointer;	 /* offset =  2 * wordsize = 16
+//  ikptr_t  frame_base;	 /* offset =  3 * wordsize = 24
+//  ikptr_t  frame_redline;	 /* offset =  4 * wordsize = 32
+//  ikptr_t  next_k;		 /* offset =  5 * wordsize = 40
+//  ikptr_t  system_stack;	 /* offset =  6 * wordsize = 48
+//  ikptr_t  dirty_vector;	 /* offset =  7 * wordsize = 56
+//  ikptr_t  arg_list;		 /* offset =  8 * wordsize = 64
+//  ikptr_t  engine_counter;	 /* offset =  9 * wordsize = 72
+//  ikptr_t  interrupted;	 /* offset = 10 * wordsize = 80
+//  ikptr_t  base_rtd;		 /* offset = 11 * wordsize = 88
+//  ikptr_t  collect_key;	 /* offset = 12 * wordsize = 96
+//   ...                            ...
+//   ... }
+
+// Scm   Intel  ARM64
+// AAR = %eax = x19	accumulator and arguments count
+// CPR = %edi = x20	pointer to closure
+// APR = %ebp = x21	allocation pointer
+// FPR = %esp = x22	frame pointer register = Scheme stack frame pointer
+// PCR = %esi = x23	pointer to PCB: Process Control Block
+//       %ecx = x24
+//       %edx = x25      [code pointer reg]
+//	 %ebx = x26
+//	        x27, x28 temps
 
   MOV x19, x2	  // AAR gets arg count
   MOV x20, x3     // CPR gets closure pointer
@@ -153,8 +154,8 @@ L_do_underflow:
   ret      // back to C, which handled the underflow 
 multivalue_underflow:
 L_multivalue_underflow:
-  addi x22, #8  // Pop 1 double from Scheme Stack ???@@@CHECKME@@@???
-  B L_do_underflow
+  ADDI x22, #8  // Pop 1 double from Scheme Stack ???@@@CHECKME@@@???
+  B   L_do_underflow
 
 // ------------------------------------------------------------
 
@@ -177,9 +178,10 @@ _ik_asm_reenter:
   MOV x19, x2      // third arg  -> argc         AAR
   MOV x22, x1      // second arg -> scheme stack FPR
   MOV x23, x0      // first arg  -> pcb addr     PCR
-  LDR x21, [x23]   // allocation pointer is at 0(pcb)
+  LDR x21, [x23]   // allocation pointer is at 0(pcb) APR
 
-  STR  SP, [x23, #48]    // save esp in pcb->system_stack
+  STR  SP, [x23, #48]    // save C SP in pcb->system_stack [unneeded]
+// ?? Save/Restore C LR ?? [ unneeded for single threaded ]
   CMPI x0, #-8           // (-1 << 4) => 1 arg
   B.ne L_multi_value_reentry
 
