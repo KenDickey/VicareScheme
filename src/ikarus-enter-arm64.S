@@ -173,7 +173,8 @@ _ik_asm_reenter:
   // callee-save registers:
   //     %rbp, %rbx, %r12, r13, r14, %r15 are callee-save [UNUSED HERE]
 
-  // called in "ikarus-exec.c"
+  // called in "ikarus-exec.c" in "ik_exec_code()" -- see comments there
+
   // argc is the third arg      x2
   // scheme stack is second arg x1
   // pcb is the first arg       x0
