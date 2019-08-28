@@ -120,8 +120,15 @@
     (ikarus.compiler.pass-insert-engine-checks)
     (ikarus.compiler.pass-insert-stack-overflow-check)
     (ikarus.compiler.code-generation)
-    (only (ikarus.compiler.intel-assembler)
-	  assemble-sources))
+    (prefix (only (ikarus.compiler.intel-assembler)
+	  assemble-sources
+          x86::)
+    (prefix (only (ikarus.compiler.intel-assembler)
+          assemble-sources
+          aarch64::)
+    (only (ikarus.environment-inquiry)
+          machine-name)
+    )
 
   (include "ikarus.wordsize.scm" #t)
 
@@ -207,7 +214,14 @@
 		    (%print-assembly code-object-sexp*)
 		    (if stop-after-assembly-generation?
 			code-object-sexp*
-		      (let ((code* (do-pass (assemble-sources thunk?-label code-object-sexp*))))
+		      (let ((code* (do-pass ((case (machine-name)
+                                               (("x86" "x86_64") x86::assemble-sources)
+                                               (("arch64") aarch64::assemble-sources)
+                                               (else error "unsupported architecture ~s" (machine-name))
+                                               )
+                                             assemble-sources
+                                             thunk?-label
+                                             code-object-sexp*))))
 			;;CODE*  is a  list of  code objects;  the first  is the  one
 			;;representing the initialisation  expression, the others are
 			;;the ones representing the CLAMBDAs.
