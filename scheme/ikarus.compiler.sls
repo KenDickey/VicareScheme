@@ -145,7 +145,11 @@
 	    (func)))
 	(initialise-core-primitive-properties)
 	(initialise-core-primitive-operations)
-	(set! compiler-initialised? #t)))))
+        (compiler-code-target (machine-name)) ;; allow parameterized cross compilation
+	(set! compiler-initialised? #t)
+        )
+      )
+    ))
 
 
 ;;;; compiler entry point
@@ -214,14 +218,21 @@
 		    (%print-assembly code-object-sexp*)
 		    (if stop-after-assembly-generation?
 			code-object-sexp*
-		      (let ((code* (do-pass ((case (machine-name)
-                                               (("x86" "x86_64") x86::assemble-sources)
-                                               (("arch64") aarch64::assemble-sources)
-                                               (else error "unsupported architecture ~s" (machine-name))
-                                               )
-                                             assemble-sources
-                                             thunk?-label
-                                             code-object-sexp*))))
+                        (let ((code* (do-pass
+                                      ((case (compiler-code-target)
+                                         (("x86" "x86_64") x86::assemble-sources)
+                                         (("arch64")   aarch64::assemble-sources)
+                                         (else
+                                          (compiler-internal-error
+                                              #f
+                                              __who__
+                                            "unsupported cpu architecture"
+                                            (compiler-code-target)))
+                                         )
+                                         assemble-sources
+                                         thunk?-label
+                                         code-object-sexp*)))
+                                )
 			;;CODE*  is a  list of  code objects;  the first  is the  one
 			;;representing the initialisation  expression, the others are
 			;;the ones representing the CLAMBDAs.

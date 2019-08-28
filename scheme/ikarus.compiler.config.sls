@@ -17,6 +17,7 @@
 #!r6rs
 (library (ikarus.compiler.config)
   (export
+    compiler-code-target
     compiler-initialisation/storage-location-gensyms-associations-func
     generate-descriptive-labels?
     generate-debug-calls
@@ -54,6 +55,9 @@
 
 
 ;;;; configuration parameters
+
+(define compiler-code-target
+  (make-parameter #f)) ;; "uname -m" on Linux
 
 (define-parameter-boolean-option strict-r6rs)
 (define-parameter-boolean-option generate-descriptive-labels?)
