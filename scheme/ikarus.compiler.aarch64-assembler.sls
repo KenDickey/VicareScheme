@@ -211,10 +211,10 @@
 ;; APR = %ebp =	x21	allocation pointer
 ;; FPR = %esp =	x22	frame pointer register = stack frame pointer
 ;; PCR = %esi =	x23	pointer to PCB: Process Control Block
-;;       %ecx = x44
+;;       %ecx = x24
 ;;       %edx = x25
 ;;	 %ebx = x26
-
+;; 	        x27, x28 temps [r8..r15 ? use calleR-saves x8..x15 ??]
 ;; Note "INTEL-CPU-REGISTER/INDEX-MAP" in "ikarus.compiler.intel-assembly.sls"
 (define (intel->arm64-cpu-register-index idx)
   (+ 1dx 19))
