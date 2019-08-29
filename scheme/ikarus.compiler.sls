@@ -121,10 +121,10 @@
     (ikarus.compiler.pass-insert-stack-overflow-check)
     (ikarus.compiler.code-generation)
     (prefix (only (ikarus.compiler.intel-assembler)
-	  assemble-sources
+	  assemble-sources)
           x86::)
     (prefix (only (ikarus.compiler.intel-assembler)
-          assemble-sources
+          assemble-sources)
           aarch64::)
     (only (ikarus.environment-inquiry)
           machine-name)
@@ -150,6 +150,18 @@
         )
       )
     ))
+
+(define (really-assemble-sources thunk?-label code-object-sexp*)
+    ((case (compiler-code-target)
+    (("x86" "x86_64") x86::assemble-sources)
+    (("arch64")   aarch64::assemble-sources)
+    (else ; @@@FIXME: better error reporting
+     (error "unsupported-cpu-architecture" (compiler-code-target))))
+   thunk?-label
+   code-object-sexp*))
+  
+(define assemble-sources really-assemble-sources)
+
 
 
 ;;;; compiler entry point
@@ -218,21 +230,7 @@
 		    (%print-assembly code-object-sexp*)
 		    (if stop-after-assembly-generation?
 			code-object-sexp*
-                        (let ((code* (do-pass
-                                      ((case (compiler-code-target)
-                                         (("x86" "x86_64") x86::assemble-sources)
-                                         (("arch64")   aarch64::assemble-sources)
-                                         (else
-                                          (compiler-internal-error
-                                              #f
-                                              __who__
-                                            "unsupported cpu architecture"
-                                            (compiler-code-target)))
-                                         )
-                                         assemble-sources
-                                         thunk?-label
-                                         code-object-sexp*)))
-                                )
+                        (let ((code* (do-pass (assemble-sources thunk?-label code-object-sexp*))))
 			;;CODE*  is a  list of  code objects;  the first  is the  one
 			;;representing the initialisation  expression, the others are
 			;;the ones representing the CLAMBDAs.
