@@ -123,11 +123,9 @@
     (prefix (only (ikarus.compiler.intel-assembler)
 	  assemble-sources)
           x86::)
-    (prefix (only (ikarus.compiler.intel-assembler)
+    (prefix (only (ikarus.compiler.intel-assembler) ;;@@@ aarch64-assembler @@@
           assemble-sources)
           aarch64::)
-    (only (ikarus.environment-inquiry)
-          machine-name)
     )
 
   (include "ikarus.wordsize.scm" #t)
@@ -145,7 +143,9 @@
 	    (func)))
 	(initialise-core-primitive-properties)
 	(initialise-core-primitive-operations)
-        (compiler-code-target (machine-name)) ;; allow parameterized cross compilation
+        ;; allow parameterized cross compilation
+        ;; (import (only (ikarus.environment-inquiry) machine-name))
+        (compiler-code-target "x86_64") ;; (machine-name) -> "uname -m"
 	(set! compiler-initialised? #t)
         )
       )
