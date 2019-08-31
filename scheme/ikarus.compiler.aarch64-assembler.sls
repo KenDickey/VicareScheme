@@ -145,6 +145,35 @@
 ;;   are represented in the input by this sexp.  The LABEL-ADDRESS sexp is present in
 ;;   the input where the address is actually used.
 ;;
+
+  ;;; @@@@ NB @@@@ ;;;
+;; To find code object from jump-point, need constant sized 
+;;   Call <addrInReg> -> Push RetAddr, Inc FPR, BR <addrInReg>
+;;
+;;   ADR IP0, #24 ;; RetAddr is 3 instructions ahead
+;;   STR IP0, [FPR], #-8  ;; push -> post decrement
+;;   BR <addrInReg>
+;;
+;; So CALL-INSTRUCTION-SIZE -> 24
+;;
+;; So Label Blocks become something like
+;; (Every arm64 instruction is 4 bytes, so header is 6 longwords)
+  
+  ;;   B L0                     4 bytes
+  ;;     livemask-bytes		8;array of bytes            --
+  ;;     framesize		8;data word, a "long"       .
+  ;;     rp_offset	        8;data word, a fixnum       . call table
+  ;;     multi-value-rp		8;data word, assembly label .
+  ;;   L0:
+  ;;     ADR IP0, #12 ;; RetAddr is 3 instructions ahead
+  ;;     STR IP0, [FPR], #-8  ;; push -> post decrement
+  ;;     BR <addrInReg>
+  ;;   single-value-rp:		;single value return point
+  ;;     ... instructions...
+  ;;   multi-value-rp:		;multi value return point
+  ;;     ... instructions...
+  
+
 
 ;;; Intel registers used to hold temporary results:
 ;;;	%eax %edi %ebx %edx %ecx %r8 %r9 %r10 %r11 %r14 %r15
