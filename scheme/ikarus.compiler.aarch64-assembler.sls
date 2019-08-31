@@ -22,7 +22,7 @@
 ;;;Major diffs are to this file and "ikarus-enter.S".
 
 #!vicare
-(library (ikarus.compiler.intel-assembler)
+(library (ikarus.compiler.aarch64-assembler)
   (export
     assemble-sources
     assembler-property-key)
@@ -820,33 +820,6 @@
     ;;Store a  machine word, whose value  is X, in the  data area of the  code object
     ;;CODE at index IDX.  The machine word is stored encoded as fixnum.
     ;;
-    (case-word-size
-     ((32)
-      ;;On 32-bit platforms, we know that X has a  payload of 32 - 2 = 30 bits in the
-      ;;bit range [0, 29].  We split such bits as follows:
-      ;;
-      ;;            2         1         0
-      ;;   987654321098765432109876543210
-      ;;   |----------------------------| 30 bits
-      ;;                           |----| 6 bits, bit range [0, 5]
-      ;;                   |------|       8 bits, bit range [6, 13]
-      ;;           |------|               8 bits, bit range [14, 21]
-      ;;   |------|                       8 bits, bit range [22, 29]
-      ;;
-      ;;*  Bit  range  [0,  5]  is  stored  in  the  first  least  significant  byte,
-      ;;left-shifted by 2 bits to represent the fixnum tag #b00.
-      ;;
-      ;;* Bit range [6, 13] is stored in the second byte.
-      ;;
-      ;;* Bit range [14, 21] is stored in the third byte.
-      ;;
-      ;;* Bit range [22, 29] is stored in the fourth byte.
-      ;;
-      (code-objects::$code-set! code (fx+ idx 0) (fxsll (fxand x #x3F) 2))
-      (code-objects::$code-set! code (fx+ idx 1) (fxand (fxsra x  6) #xFF))
-      (code-objects::$code-set! code (fx+ idx 2) (fxand (fxsra x 14) #xFF))
-      (code-objects::$code-set! code (fx+ idx 3) (fxand (fxsra x 22) #xFF)))
-     ((64)
       ;;On 64-bit platforms, we know that X has a  payload of 64 - 3 = 61 bits in the
       ;;bit range 0-60.  We split such bits as follows:
       ;;
@@ -886,7 +859,7 @@
       (code-objects::$code-set! code (fx+ idx 4) (fxand (fxsra x 29) #xFF))
       (code-objects::$code-set! code (fx+ idx 5) (fxand (fxsra x 37) #xFF))
       (code-objects::$code-set! code (fx+ idx 6) (fxand (fxsra x 45) #xFF))
-      (code-objects::$code-set! code (fx+ idx 7) (fxand (fxsra x 53) #xFF)))))
+      (code-objects::$code-set! code (fx+ idx 7) (fxand (fxsra x 53) #xFF)))
 
   (define* (%set-label-loc! x loc)
     (if (getprop x '*label-loc*)
@@ -1210,6 +1183,40 @@
     (define-register-mapping-predicate reg32?  32)
     (define-register-mapping-predicate xmmreg? 'xmm))
 
+  (define REGISTER-MAPPING
+    '( ;; scalar regs
+       (CResult . 0) 
+       (CArg0  .  0) (CArg1  .  1) (CArg2  .  2) (CArg3  .  3)
+       (CArg4  .  4) (CArg5  .  5) (CArg6  .  6) (CArg7  .  7)
+       ;; Scheme REgs
+       (AAR . 19) (CPR . 20) (APR . 21) (FPR . 22) (PCR . 23)
+       (SchTemp0 . 27) (SchTemp1 . 28) 
+       ;; Intel Reg Aliases
+       (%eax . 19) (%edi . 20) (%ebp . 21) (%esp . 22)
+       (%esi . 23) (%ecx . 24) (%edx . 25) (%ebx . 26)
+       ;; arm64 scalar regs
+       (x0  .  0) (x1  .  1) (x2  .  2) (x3  .  3)
+       (x4  .  4) (x5  .  5) (x6  .  6) (x7  .  7)
+       (x8  .  8) (x9  .  9) (x10 . 10) (x11 . 11)
+       (x12 . 12) (x13 . 13) (x14 . 14) (x15 . 15)
+       (x16 . 16) (x17 . 17) (x18 . 18) (x19 . 19)
+       (x20 . 20) (x21 . 21) (x22 . 22) (x23 . 23)
+       (x24 . 24) (x25 . 25) (x26 . 26) (x27 . 27)
+       (x28 . 28) (x29 . 29) (x30 . 30) (x31 . 31)
+       (SP  . 31) (xzr . 31) (LR  . 30) (FP  . 29)
+       (IP0 . 16) (IP1 . 17) (scratch0 . 16) (scratch1 . 17)
+       ;; arm64 floating point regs
+       (d0  .  0) (d1  .  1) (d2  .  2) (d3  .  3)
+       (d4  .  4) (d5  .  5) (d6  .  6) (d7  .  7)
+       (d8  .  8) (d9  .  9) (d10 . 10) (d11 . 11)
+       (d12 . 12) (d13 . 13) (d14 . 14) (d15 . 15)
+       (d16 . 16) (d17 . 17) (d18 . 18) (d19 . 19)
+       (d20 . 20) (d21 . 21) (d22 . 22) (d23 . 23)
+       (d24 . 24) (d25 . 25) (d26 . 26) (d27 . 27)
+       (d28 . 28) (d29 . 29) (d30 . 30) (d31 . 31)
+       (floatResult . 0)
+      ))
+  
   (define* (register-index x)
     ;;X must be a symbol representing the name of a CPU register.  Query the table of
     ;;registers and return the IDX field from the relevant entry.
@@ -1219,81 +1226,8 @@
 	  (else
 	   (%compiler-internal-error __who__ "expected symbol representing register name" x))))
 
-  (define* (reg-requires-REX.R-prefix? x)
-    ;;X must be a symbol representing the name of a CPU register.  Query the table of
-    ;;registers and return the REX.R field from  the relevant entry: #t if use of the
-    ;;register  requires  pushing  a REX.R  prefix  on  the  ACCUM  in front  of  the
-    ;;instruction opcode; #f if no prefix is needed.
-    ;;
-    ;;NOTE The REX.R prefix  is needed only when the register is  a 64-bit one among:
-    ;;%r8, %r9, %r10, %r11, %r12, %r13,  %r14, %r15, %r8l, %r9l, %r10l, %r11l, %r12l,
-    ;;%r13l, %r14l, %r15l.
-    ;;
-    (cond ((assq x REGISTER-MAPPING)
-	   => cadddr)
-	  (else
-	   (%compiler-internal-error __who__ "expected symbol representing CPU register name" x))))
-
-  (define-constant REGISTER-MAPPING
-;;;     reg  cls  idx  REX.R
-    '((%eax   32    0  #f)
-      (%ecx   32    1  #f)
-      (%edx   32    2  #f)
-      (%ebx   32    3  #f)
-      (%esp   32    4  #f)
-      (%ebp   32    5  #f)
-      (%esi   32    6  #f)
-      (%edi   32    7  #f)
-      (%r8    32    0  #t)
-      (%r9    32    1  #t)
-      (%r10   32    2  #t)
-      (%r11   32    3  #t)
-      (%r12   32    4  #t)
-      (%r13   32    5  #t)
-      (%r14   32    6  #t)
-      (%r15   32    7  #t)
-      (%al     8    0  #f)
-      (%cl     8    1  #f)
-      (%dl     8    2  #f)
-      (%bl     8    3  #f)
-      (%ah     8    4  #f)
-      (%ch     8    5  #f)
-      (%dh     8    6  #f)
-      (%bh     8    7  #f)
-      (/0      0    0  #f)
-      (/1      0    1  #f)
-      (/2      0    2  #f)
-      (/3      0    3  #f)
-      (/4      0    4  #f)
-      (/5      0    5  #f)
-      (/6      0    6  #f)
-      (/7      0    7  #f)
-      (xmm0  xmm    0  #f)
-      (xmm1  xmm    1  #f)
-      (xmm2  xmm    2  #f)
-      (xmm3  xmm    3  #f)
-      (xmm4  xmm    4  #f)
-      (xmm5  xmm    5  #f)
-      (xmm6  xmm    6  #f)
-      (xmm7  xmm    7  #f)
-      (%r8l    8    0  #t)
-      (%r9l    8    1  #t)
-      (%r10l   8    2  #t)
-      (%r11l   8    3  #t)
-      (%r12l   8    4  #t)
-      (%r13l   8    5  #t)
-      (%r14l   8    6  #t)
-      (%r15l   8    7  #t)
-      ))
-
-  ;;Commented out because unused.  (Marco Maggi; Wed Nov  5, 2014)
-  ;;
-  ;;(define (SIB s offset-register base-register ac)
-  ;;  (cons (byte (fxior (register-index base-register)
-  ;;                       (fxior (fxsll (register-index offset-register) 3)
-  ;;                                (fxsll s 6))))
-  ;;        ac))
-
+  
+  
 ;;; --------------------------------------------------------------------
 ;;; immediate operands: predicates
 
