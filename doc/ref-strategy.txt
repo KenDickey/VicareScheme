@@ -1,0 +1,32 @@
+"ref-strategy.txt"
+Discussion on reg/mem/immediate refs in code
+
+Source Cases:
+  reg: [use reg as source register]
+  mem: reg + offset
+    offset fits in opcode:
+        ip0 <- memAt reg + offset ;; ldr
+        [use ip0 as source reg]
+    offset does NOT fit in opcode:
+        <use next case strategy to keep offset in instruction stream>
+        ip0 += reg  ;; reg + offset -> ip0 ;; add ip0, reg, #offset
+        ip0 <- memAt ip0 ;; ldr ip0, ip0
+        [use ip0 as source reg]
+  immed:
+     if value fits in opcode, put in opcode
+     else 
+adr+0:  adr ip0, #16         ;; adr+16 bytes ahead
+;; (adr + br opcodes are 4 bytes each) + (8 byte (64 bit) immediate)
+adr+4:  br ip0               ;; branch around literal
+adr+8: <<literal immediate>> ;; 64 bit literal in opcode stream
+adr+16: ldr ip0, [ip0, #-8]  ;; load literal from code stream
+        [use ip0 as source reg]
+
+Target Cases:
+   reg: [use reg as dest register]
+   mem: reg + offset
+     use ip1 as dest register
+     setMemAt (reg + offset) to ip1 ;; <use above strategy if offset too big>
+
+
+;; E O F ;;
