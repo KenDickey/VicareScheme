@@ -28,5 +28,15 @@ Target Cases:
      use ip1 as dest register
      setMemAt (reg + offset) to ip1 ;; <use above strategy if offset too big>
 
+@@ Hmmm.. scrub that.  Can do wide moves with fewer instructions.
+
+Note: Move Wide Immediate for 16 bits
+  MOVZ <Xd>, #<imm16>{, LSL #<shift>} 
+
+so 2 instructions for for 32 bits:
+  MOVZ Xdest, #<immed16Hi>, LSL #16  ;; Move+Zero other bits
+  MOVK Xdest, #<immed16Lo>, LSL #0   ;; Move+Keep other bits
+
+@@ We also have LDR with offset..
 
 ;; E O F ;;
